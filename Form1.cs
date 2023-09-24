@@ -9,137 +9,174 @@ namespace PhotoCorrection {
 			InitializeComponent();
 		}
 
-        public static Bitmap original_image;
-        public static Bitmap modified_image;
-        public static string full_name_of_image = "\0";
+		public static Bitmap originalImage;
+		public static Bitmap modifiedImage;
+		public static string imageFullName = "\0";
 
-        private void OpenFile_ToolStripMenuItem_Click(object sender, EventArgs e) {
-			/* Выбор изображение с помощью диалогового окна */
+		/// <summary>
+		/// Выбор изображения с помощью диалогового окна
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		private void ToolStripMenuItemOpenFileClick(object sender, EventArgs e) {
 
-			OpenFileDialog open_dialog = new OpenFileDialog();
-			open_dialog.Filter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.BMP;*.JPG;*.GIF;*.PNG|All files (*.*)|*.*";
+			OpenFileDialog openFileDialog = new OpenFileDialog {
+				Filter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.BMP;*.JPG;*.GIF;*.PNG|All files (*.*)|*.*"
+			};
 
-            if (open_dialog.ShowDialog() == DialogResult.OK) {
-                try {
-                    if (full_name_of_image != "\0") {
-                        original_image.Dispose();
-                        modified_image.Dispose();
-                    }
+			if (openFileDialog.ShowDialog() == DialogResult.OK) {
+				try {
+					if (imageFullName != "\0") {
+						originalImage.Dispose();
+						modifiedImage.Dispose();
+					}
 
-                    full_name_of_image = open_dialog.FileName;
+					imageFullName = openFileDialog.FileName;
 
-                    original_image = new Bitmap(open_dialog.FileName);
-                    modified_image = new Bitmap(open_dialog.FileName);
+					originalImage = new Bitmap(openFileDialog.FileName);
+					modifiedImage = new Bitmap(openFileDialog.FileName);
 
-                    UpdateGUI();
-                }
-                catch {
-                    full_name_of_image = "\0";
-                    DialogResult result = MessageBox.Show("Невозможно открыть выбранный файл", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
+					UpdateGUI();
+				}
+				catch {
+					imageFullName = "\0";
 
-		private void SaveAsFile_ToolStripMenuItem_Click(object sender, EventArgs e) {
-            /* Сохранение изображения с помощью диалогового окна */
-            
-            if (full_name_of_image != "\0") {
-                SaveFileDialog savedialog = new SaveFileDialog();
-                savedialog.Title = "Сохранить картинку как...";
-                savedialog.OverwritePrompt = true;
-                savedialog.CheckPathExists = true;
-                savedialog.Filter = "Image Files(*.BMP)|*.BMP|Image Files(*.JPG)|*.JPG|Image Files(*.GIF)|*.GIF|Image Files(*.PNG)|*.PNG|All files (*.*)|*.*";
-                savedialog.ShowHelp = true;
-                if (savedialog.ShowDialog() == DialogResult.OK) {
-                    try {
-                        Console.WriteLine(savedialog.FileName);
-                        modified_image.Save(savedialog.FileName, System.Drawing.Imaging.ImageFormat.Jpeg);
-                    }
-                    catch {
-                        MessageBox.Show("Невозможно сохранить изображение", "Ошибка",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-            }
-        }
+					MessageBox.Show(
+						"Невозможно открыть выбранный файл",
+						"Ошибка",
+						MessageBoxButtons.OK,
+						MessageBoxIcon.Error
+					);
+				}
+			}
+		}
 
-        private void UpdateGUI() {
-            /* Обновить элементы управления на форме */
+		/// <summary>
+		/// Сохранение изображения с помощью диалогового окна
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		private void ToolStripMenuItemSaveAsFileClick(object sender, EventArgs e) {
+			if (imageFullName == "\0") {
+				return;
+			}
 
-            label_original_size.Text = original_image.Width.ToString() + " x " + original_image.Height.ToString();
-            label_modified_size.Text = modified_image.Width.ToString() + " x " + modified_image.Height.ToString();
+			SaveFileDialog saveFileDialog = new SaveFileDialog {
+				Title = "Сохранить картинку как...",
+				OverwritePrompt = true,
+				CheckPathExists = true,
+				Filter = "Image Files(*.BMP)|*.BMP|Image Files(*.JPG)|*.JPG|Image Files(*.GIF)|*.GIF|Image Files(*.PNG)|*.PNG|All files (*.*)|*.*",
+				ShowHelp = true
+			};
 
-            numericUpDown_bicubicX.Value = 1;
-            numericUpDown_bicubicY.Value = 1;
+			if (saveFileDialog.ShowDialog() == DialogResult.OK) {
+				try {
+					modifiedImage.Save(
+						saveFileDialog.FileName,
+						System.Drawing.Imaging.ImageFormat.Jpeg
+					);
+				}
+				catch {
+					MessageBox.Show(
+						"Невозможно сохранить изображение",
+						"Ошибка",
+						MessageBoxButtons.OK,
+						MessageBoxIcon.Error
+					);
+				}
+			}
+		}
 
-            numericUpDown_bilinearX.Value = 1;
-            numericUpDown_bilinearY.Value = 1;
+		/// <summary>
+		/// Обновить элементы управления на форме
+		/// </summary>
+		private void UpdateGUI() {
 
-            pictureBox_original.Image = original_image;
-            pictureBox_modified.Image = modified_image;
-        }
+			labelOriginalSize.Text = originalImage.Width.ToString() + " x " + originalImage.Height.ToString();
+			labelModifiedSize.Text = modifiedImage.Width.ToString() + " x " + modifiedImage.Height.ToString();
 
-        public void ShowModified() {
-            pictureBox_modified.Image = modified_image;
-            label_modified_size.Text = modified_image.Width.ToString() + " x " + modified_image.Height.ToString();
-        }
+			numericUpDownBicubicX.Value = 1;
+			numericUpDownBicubicY.Value = 1;
 
-		private void button_execute_bilinear_Click(object sender, EventArgs e) {
-            /* Применение билинейного сглаживания к фото */
+			numericUpDownBilinearX.Value = 1;
+			numericUpDownBilinearY.Value = 1;
 
-            if (full_name_of_image != "\0") {
+			pictureBoxOriginal.Image = originalImage;
+			pictureBoxModified.Image = modifiedImage;
+		}
 
-                float scaleX = (float)numericUpDown_bilinearX.Value;
-                float scaleY = (float)numericUpDown_bilinearY.Value;
+		/// <summary>
+		/// Вывести модифицированное изображение
+		/// </summary>
+		public void ShowModified() {
+			pictureBoxModified.Image = modifiedImage;
+			labelModifiedSize.Text = modifiedImage.Width.ToString() + " x " + modifiedImage.Height.ToString();
+		}
 
-                modified_image.Dispose();
+		/// <summary>
+		/// Эвент нажатия на кнопку применения билинейного сглаживания
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		private void ButtonExecuteBilinearClick(object sender, EventArgs e) {
+			if (imageFullName == "\0") {
+				return;
+			}
 
-                Stopwatch stopWatch = new Stopwatch();
-                stopWatch.Start();
+			float scaleX = (float)numericUpDownBilinearX.Value;
+			float scaleY = (float)numericUpDownBilinearY.Value;
 
-                modified_image = BilinearInterpolation.Scale(original_image, scaleX, scaleY);
+			modifiedImage.Dispose();
 
-                stopWatch.Stop();
-                TimeSpan ts = stopWatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                label_time.Text = elapsedTime;
+			Stopwatch stopWatch = new Stopwatch();
+			stopWatch.Start();
 
-                ShowModified();
-                modified_image.Save(full_name_of_image + "_bilinear" +
-                    modified_image.Width.ToString() +
-                    " x " +
-                    modified_image.Height.ToString() +
-                    ".jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
-            }
-        }
+			modifiedImage = BilinearInterpolation.Scale(originalImage, scaleX, scaleY);
 
-		private void button_execute_bicubic_Click(object sender, EventArgs e) {
-            /* Применение бикубического сглаживания к фото */
-            if (full_name_of_image != "\0") {
+			stopWatch.Stop();
+			TimeSpan ts = stopWatch.Elapsed;
+			string elapsedTime = string.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+			labelExecutionTime.Text = elapsedTime;
 
-                float scaleX = (float)numericUpDown_bicubicX.Value;
-                float scaleY = (float)numericUpDown_bicubicY.Value;
+			ShowModified();
 
-                modified_image.Dispose();
+			modifiedImage.Save(
+				imageFullName + "_bilinear" + modifiedImage.Width.ToString() + "x" + modifiedImage.Height.ToString() + ".jpg",
+				System.Drawing.Imaging.ImageFormat.Jpeg
+			);
+		}
 
-                Stopwatch stopWatch = new Stopwatch();
-                stopWatch.Start();
+		/// <summary>
+		/// Эвент нажатия на кнопку применения бикубического сглаживания
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		private void ButtonExecuteBicubicClick(object sender, EventArgs e) {
+			if (imageFullName == "\0") {
+				return;
+			}
 
-                modified_image = BicubicInterpolation.Scale(original_image, scaleX, scaleY);
+			float scaleX = (float)numericUpDownBicubicX.Value;
+			float scaleY = (float)numericUpDownBicubicY.Value;
 
-                stopWatch.Stop();
-                TimeSpan ts = stopWatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                label_time.Text = elapsedTime;
+			modifiedImage.Dispose();
 
-                ShowModified();
+			Stopwatch stopWatch = new Stopwatch();
+			stopWatch.Start();
 
-                modified_image.Save(full_name_of_image + "_bicubic" + 
-                    modified_image.Width.ToString() + 
-                    " x " + 
-                    modified_image.Height.ToString() + 
-                    ".jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
-            }
-        }
+			modifiedImage = BicubicInterpolation.Scale(originalImage, scaleX, scaleY);
+
+			stopWatch.Stop();
+			TimeSpan ts = stopWatch.Elapsed;
+			string elapsedTime = string.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+			labelExecutionTime.Text = elapsedTime;
+
+			ShowModified();
+
+			modifiedImage.Save(
+				imageFullName + "_bicubic" + modifiedImage.Width.ToString() + "x" + modifiedImage.Height.ToString() + ".jpg",
+				System.Drawing.Imaging.ImageFormat.Jpeg
+			);
+		}
 	}
 }
